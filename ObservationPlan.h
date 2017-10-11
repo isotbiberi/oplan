@@ -17,6 +17,10 @@
 #include <string>
 #include <map>
 #include <iostream>
+#include <sys/time.h>
+#include<time.h>
+#include <stdint.h>
+
 using namespace std;
 
 struct slot
@@ -33,6 +37,12 @@ public:
 	int readPlan();
 	int initializeXML();
 	int applyPlan(slot);
+	void waitMicroSec(long microSec);
+	void waitSec(long sec);
+	uint64_t GetTimeStamp();
+    void printTimeStamp();
+    vector<string> timeParser(string planTime);
+    void parsedToDateTime(vector<string>);
 
     vector<pair<string, string> > imageLine;
 	vector<vector<pair<string, string> > > imageLines;
