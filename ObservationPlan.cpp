@@ -54,13 +54,28 @@ int ObservationPlan::applyPlan(slot selectedSlot)
 
 {
 
-	for (int i = 0; i < selectedSlot.mounts.size(); i++)
-	{
-		 parsedToDateTime (timeParser(selectedSlot.mounts[i][1].second));
-		 cout<<" mount is moving to azimuth :"<<selectedSlot.mounts[i][2].second<<" Elevation "<<selectedSlot.mounts[i][3].second <<endl;
+	for (int i = 0; i < selectedSlot.mounts.size(); i++) {
+		// parsedToDateTime (timeParser(selectedSlot.mounts[i][1].second));
+		// std::cout<<parsedToDateMilliSec(timeParser(selectedSlot.mounts[i][1].second))<<endl;
+
+		// std::cout<<parsedToDateMilliSec(timeParser(selectedSlot.mounts[i][1].second))-return_current_time_and_date()<<endl;
+
+		cout << "mount time is in epoch ms " << selectedSlot.mounts[i][1].second
+				<< "mount time is in microseconds " << selectedSlot.mounts[i][2].second
+				<< " mount is moving to azimuth : "
+				<< selectedSlot.mounts[i][3].second << " Elevation : "
+				<< selectedSlot.mounts[i][4].second << endl;
+		cout << "exp start time time is in epoch ms "<< selectedSlot.images[i][1].second
+				<< "exp start time microseconds is "<< selectedSlot.images[i][2].second
+				<< " Exptime is :"<< selectedSlot.images[i][3].second
+				<< " Number of exp is "<< selectedSlot.images[i][4].second << endl;
+		cout << "difference is "
+				<< std::stoll(selectedSlot.mounts[i][1].second)
+						- std::stoll(selectedSlot.images[i][1].second)
+				<< std::endl;
 
 		//parsedToDateTime (timeParser(selectedSlot.mounts[i][1].second));
-		 //  cout <<" Exp start time is " << selectedSlot.images[i][1].second <<endl;
+		//  cout <<" Exp start time is " << selectedSlot.images[i][1].second <<endl;
 
 	}
 	return 0;
@@ -126,255 +141,280 @@ int ObservationPlan::readPlan() {
 		bool mountLineParts[4] = { false, false, false, false };
 		bool slotParts[4] = { false, false, false, false };
 
-		for (current_node = walker->nextNode(); current_node != 0;
-				current_node = walker->nextNode()) {
+	for (current_node = walker->nextNode(); current_node != 0;
+			current_node = walker->nextNode()) {
 
-			thisNodeName = XMLString::transcode(current_node->getNodeName());
-			parentNodeName = XMLString::transcode(
-					current_node->getParentNode()->getNodeName());
+		thisNodeName = XMLString::transcode(current_node->getNodeName());
+		parentNodeName = XMLString::transcode(
+				current_node->getParentNode()->getNodeName());
 
-			//	std::cout<<"this node is "<<thisNodeName<<" parent is " <<parentNodeName<<endl;
+		//	std::cout<<"this node is "<<thisNodeName<<" parent is " <<parentNodeName<<endl;
 
-			if (parentNodeName == "Slots")
+		if (parentNodeName == "Slots")
 
-			{
+		{
 
-				//   std::cout<<"slot if true"<<endl;
+			//   std::cout<<"slot if true"<<endl;
 
-				slotsVect.push_back(slot());
-				//slotsVectSet  = true;
+			slotsVect.push_back(slot());
+			//slotsVectSet  = true;
 
-				if (thisNodeName == "SlotID") {
-					slotParts[0] = true;
-					slotsVect[slotNumber].slotID = XMLString::transcode(
-							current_node->getFirstChild()->getNodeValue());
+			if (thisNodeName == "SlotID") {
+				slotParts[0] = true;
+				slotsVect[slotNumber].slotID = XMLString::transcode(
+						current_node->getFirstChild()->getNodeValue());
 
-				} else if (thisNodeName == "ObjectID") {
-					slotParts[1] = true;
-					slotsVect[slotNumber].ObjectID = XMLString::transcode(
-							current_node->getFirstChild()->getNodeValue());
+			} else if (thisNodeName == "ObjectID") {
+				slotParts[1] = true;
+				slotsVect[slotNumber].ObjectID = XMLString::transcode(
+						current_node->getFirstChild()->getNodeValue());
 
-				} else if (thisNodeName == "StartTime") {
-					slotParts[2] = true;
-					slotsVect[slotNumber].StartTime = XMLString::transcode(
-							current_node->getFirstChild()->getNodeValue());
+			} else if (thisNodeName == "StartTime") {
+				slotParts[2] = true;
+				slotsVect[slotNumber].StartTime = XMLString::transcode(
+						current_node->getFirstChild()->getNodeValue());
 
-				}
+			}
 
-				else if (thisNodeName == "EndTime") {
-					slotParts[3] = true;
-					slotsVect[slotNumber].EndTime = XMLString::transcode(
-							current_node->getFirstChild()->getNodeValue());
+			else if (thisNodeName == "EndTime") {
+				slotParts[3] = true;
+				slotsVect[slotNumber].EndTime = XMLString::transcode(
+						current_node->getFirstChild()->getNodeValue());
 
-				}
-				if (slotParts[3] && slotParts[2] && slotParts[1]
-						&& slotParts[0]) {
+			}
+			if (slotParts[3] && slotParts[2] && slotParts[1]
+					&& slotParts[0]) {
 
-					slotParts[0] = false;
-					slotParts[1] = false;
-					slotParts[2] = false;
-					slotParts[3] = false;
+				slotParts[0] = false;
+				slotParts[1] = false;
+				slotParts[2] = false;
+				slotParts[3] = false;
 
-				}
+			}
 
-			}			//end if Slot
+		}			//end if Slot
 
-			if (parentNodeName == "ImageLine")
+		if (parentNodeName == "ImageLine")
 
-			{
+		{
 
-				// std::cout<<"imageline if true"<<endl;
+			// std::cout<<"imageline if true"<<endl;
 
-				if (thisNodeName == "ImageLineID") {
-					imageLineParts[0] = true;
+			if (thisNodeName == "ImageLineID") {
+				imageLineParts[0] = true;
 
-					imageLine.push_back(
-							std::make_pair("ImageLineID",
-									XMLString::transcode(
-											current_node->getFirstChild()->getNodeValue())));
-				} else if (thisNodeName == "Time") {
-					imageLineParts[1] = true;
+				imageLine.push_back(
+						std::make_pair("ImageLineID",
+								XMLString::transcode(
+										current_node->getFirstChild()->getNodeValue())));
+			} else if (thisNodeName == "Time") {
+				imageLineParts[1] = true;
 
-					imageLine.push_back(
-							std::make_pair("Time",
-									XMLString::transcode(
-											current_node->getFirstChild()->getNodeValue())));
+				string imageTime = XMLString::transcode(
+						current_node->getFirstChild()->getNodeValue());
 
-				} else if (thisNodeName == "ExposureTime") {
-					imageLineParts[2] = true;
+				//	std::cout<<"non parsed is "<<nonParsedToDateMilliSec(imageTime)-return_current_time_and_date()<<std::endl;
 
-					imageLine.push_back(
-							std::make_pair("ExposureTime",
-									XMLString::transcode(
-											current_node->getFirstChild()->getNodeValue())));
+				/*
+				 imageLine.push_back(
+				 std::make_pair("Time",
+				 XMLString::transcode(
+				 current_node->getFirstChild()->getNodeValue())));
+				 */
 
-				}
+				/*imageLine.push_back(
+						std::make_pair("Time",
+								std::to_string(
+										nonParsedToDateMilliSec(
+												imageTime))));*/
 
-				else if (thisNodeName == "FrameNumber") {
-					imageLineParts[3] = true;
-					imageLine.push_back(
-							std::make_pair("FrameNumber",
-									XMLString::transcode(
-											current_node->getFirstChild()->getNodeValue())));
+				imageLine.push_back(std::make_pair("Time",std::to_string(parsedToDateMilliSec(timeParser(imageTime)))));
+				imageLine.push_back(std::make_pair("MicroSec",std::to_string(nonparsedToDateMicroSec(timeParser(imageTime)[2]))));
 
-				} else if (thisNodeName == "Gain") {
-					imageLineParts[4] = true;
-					imageLine.push_back(
-							std::make_pair("Gain",
-									XMLString::transcode(
-											current_node->getFirstChild()->getNodeValue())));
 
-				} else if (thisNodeName == "Focus") {
-					imageLineParts[5] = true;
-					imageLine.push_back(
-							std::make_pair("Focus",
-									XMLString::transcode(
-											current_node->getFirstChild()->getNodeValue())));
 
-				} else if (thisNodeName == "Binning") {
-					imageLineParts[6] = true;
-					imageLine.push_back(
-							std::make_pair("Binning",
-									XMLString::transcode(
-											current_node->getFirstChild()->getNodeValue())));
 
-				}
+			} else if (thisNodeName == "ExposureTime") {
+				imageLineParts[2] = true;
 
-				if (imageLineParts[6] && imageLineParts[5] && imageLineParts[4]
-						&& imageLineParts[3] && imageLineParts[2]
-						&& imageLineParts[1] && imageLineParts[0]) {
-					//std::cout<<"imageline parts hepsi true oldu"<<imageLine[0].first<<std::endl;
-
-					imageLines.push_back(imageLine);
-					//std::cout<<"imageline parts hepsi true oldu"<<imageLine[0].first<<std::endl;
-
-					imageLine.clear();
-					imageLineParts[0] = false;
-					imageLineParts[1] = false;
-					imageLineParts[2] = false;
-					imageLineParts[3] = false;
-					imageLineParts[4] = false;
-					imageLineParts[5] = false;
-					imageLineParts[6] = false;
-
-				}
-
-				//std::cout<<"imageline parts hepsi true muoldu"<<imageLine[0].first<<std::endl;
-				// imageLinesSet = true;
-			}					//end if ImageLine
-
-			//	std::cout<<"imageline parts hepsi true oldu"<<imageLine[0].first<<std::endl;
-
-			if (parentNodeName == "MountLine")
-
-			{
-				// std::cout<<"mountline if true"<<endl;
-
-				if (thisNodeName == "MountLineID") {
-					mountLineParts[0] = true;
+				imageLine.push_back(
+						std::make_pair("ExposureTime",
+								XMLString::transcode(
+										current_node->getFirstChild()->getNodeValue())));
 
-					mountLine.push_back(
-							std::make_pair("MountLineID",
-									XMLString::transcode(
-											current_node->getFirstChild()->getNodeValue())));
-				} else if (thisNodeName == "Time") {
-					mountLineParts[1] = true;
+			}
+
+			else if (thisNodeName == "FrameNumber") {
+				imageLineParts[3] = true;
+				imageLine.push_back(
+						std::make_pair("FrameNumber",
+								XMLString::transcode(
+										current_node->getFirstChild()->getNodeValue())));
+
+			} else if (thisNodeName == "Gain") {
+				imageLineParts[4] = true;
+				imageLine.push_back(
+						std::make_pair("Gain",
+								XMLString::transcode(
+										current_node->getFirstChild()->getNodeValue())));
+
+			} else if (thisNodeName == "Focus") {
+				imageLineParts[5] = true;
+				imageLine.push_back(
+						std::make_pair("Focus",
+								XMLString::transcode(
+										current_node->getFirstChild()->getNodeValue())));
 
-					mountLine.push_back(
-							std::make_pair("Time",
-									XMLString::transcode(
-											current_node->getFirstChild()->getNodeValue())));
-
-				} else if (thisNodeName == "Azimuth") {
-					mountLineParts[2] = true;
-
-					mountLine.push_back(
-							std::make_pair("Azimuth",
-									XMLString::transcode(
-											current_node->getFirstChild()->getNodeValue())));
-
-				}
-
-				else if (thisNodeName == "Elevation") {
-					mountLineParts[3] = true;
-					mountLine.push_back(
-							std::make_pair("Elevation",
-									XMLString::transcode(
-											current_node->getFirstChild()->getNodeValue())));
-
-				}
-
-				if (mountLineParts[3] && mountLineParts[2] && mountLineParts[1]
-						&& mountLineParts[0]) {
-
-					mountLines.push_back(mountLine);
-
-					mountLine.clear();
-					mountLineParts[0] = false;
-					mountLineParts[1] = false;
-					mountLineParts[2] = false;
-					mountLineParts[3] = false;
-
-				}
-
-			}					//end if MountLine
-
-		}  //end of for loop
-
-	}  //end of try
-
-	catch (xercesc::XMLException& e) {
-		char* message = xercesc::XMLString::transcode(e.getMessage());
-		ostringstream errBuf;
-		errBuf << "Error parsing file: " << message << flush;
-		XMLString::release(&message);
-	}
-
-	slotsVect[slotNumber].images = imageLines;
-	slotsVect[slotNumber].mounts = mountLines;
-	slotNumber++;
-
-	/*
-
-	 for (int i = 0; i < imageLines.size(); i++)
-	 {
-	 imageLine = imageLines[i];
-	 cout <<"printing image line "<<i+1<<endl;
-	 for (int i = 0; i < imageLine.size(); i++)
-	 {
-	 cout << imageLine[i].first << ", " << imageLine[i].second <<endl;
-	 }
-	 }
-	 */
-
-	/*
-	 for (int i = 0; i < mountLines.size(); i++)
-	 {
-	 mountLine = mountLines[i];
-	 cout <<"printing image line "<<i+1<<endl;
-	 for (int i = 0; i < mountLine.size(); i++)
-	 {
-	 cout << mountLine[i].first << ", " << mountLine[i].second <<endl;
-	 }
-	 }
-	 */
-
-	/*
-
-	 for (int i = 0; i < slotsVect[0].imageLines.size(); i++)
-	 {
-	 cout<<"ismail"<<slotsVect[0].imageLines.size()<<endl;
-
-	 //cout << slots[i].first << ", " << slots[i].second <<endl;
-
-	 }
-
-
-	 */
-
-	delete parser;
-
-	std::cout << "plan readed" << std::endl;
+			} else if (thisNodeName == "Binning") {
+				imageLineParts[6] = true;
+				imageLine.push_back(
+						std::make_pair("Binning",
+								XMLString::transcode(
+										current_node->getFirstChild()->getNodeValue())));
+
+			}
+
+			if (imageLineParts[6] && imageLineParts[5] && imageLineParts[4]
+					&& imageLineParts[3] && imageLineParts[2]
+					&& imageLineParts[1] && imageLineParts[0]) {
+				//std::cout<<"imageline parts hepsi true oldu"<<imageLine[0].first<<std::endl;
+
+				imageLines.push_back(imageLine);
+				//std::cout<<"imageline parts hepsi true oldu"<<imageLine[0].first<<std::endl;
+
+				imageLine.clear();
+				imageLineParts[0] = false;
+				imageLineParts[1] = false;
+				imageLineParts[2] = false;
+				imageLineParts[3] = false;
+				imageLineParts[4] = false;
+				imageLineParts[5] = false;
+				imageLineParts[6] = false;
+
+			}
+
+			//std::cout<<"imageline parts hepsi true muoldu"<<imageLine[0].first<<std::endl;
+			// imageLinesSet = true;
+		}					//end if ImageLine
+
+		//	std::cout<<"imageline parts hepsi true oldu"<<imageLine[0].first<<std::endl;
+
+		if (parentNodeName == "MountLine")
+
+		{
+			// std::cout<<"mountline if true"<<endl;
+
+			if (thisNodeName == "MountLineID") {
+				mountLineParts[0] = true;
+
+				mountLine.push_back(
+						std::make_pair("MountLineID",
+								XMLString::transcode(
+										current_node->getFirstChild()->getNodeValue())));
+			} else if (thisNodeName == "Time") {
+				mountLineParts[1] = true;
+				string mountTime = XMLString::transcode(
+						current_node->getFirstChild()->getNodeValue());
+				/*mountLine.push_back(
+						std::make_pair("Time",
+								std::to_string(
+										nonParsedToDateMilliSec(
+												mountTime))));*/
+
+				mountLine.push_back(std::make_pair("Time",std::to_string(parsedToDateMilliSec(timeParser(mountTime)))));
+				mountLine.push_back(std::make_pair("MicroSec",std::to_string(nonparsedToDateMicroSec(timeParser(mountTime)[2]))));
+
+
+			} else if (thisNodeName == "Azimuth") {
+				mountLineParts[2] = true;
+
+				mountLine.push_back(
+						std::make_pair("Azimuth",
+								XMLString::transcode(
+										current_node->getFirstChild()->getNodeValue())));
+
+			}
+
+			else if (thisNodeName == "Elevation") {
+				mountLineParts[3] = true;
+				mountLine.push_back(
+						std::make_pair("Elevation",
+								XMLString::transcode(
+										current_node->getFirstChild()->getNodeValue())));
+
+			}
+
+			if (mountLineParts[3] && mountLineParts[2] && mountLineParts[1]
+					&& mountLineParts[0]) {
+
+				mountLines.push_back(mountLine);
+
+				mountLine.clear();
+				mountLineParts[0] = false;
+				mountLineParts[1] = false;
+				mountLineParts[2] = false;
+				mountLineParts[3] = false;
+
+			}
+
+		}					//end if MountLine
+
+	}  //end of for loop
+
+}  //end of try
+
+catch (xercesc::XMLException& e) {
+	char* message = xercesc::XMLString::transcode(e.getMessage());
+	ostringstream errBuf;
+	errBuf << "Error parsing file: " << message << flush;
+	XMLString::release(&message);
+}
+
+slotsVect[slotNumber].images = imageLines;
+slotsVect[slotNumber].mounts = mountLines;
+slotNumber++;
+
+/*
+
+ for (int i = 0; i < imageLines.size(); i++)
+ {
+ imageLine = imageLines[i];
+ cout <<"printing image line "<<i+1<<endl;
+ for (int i = 0; i < imageLine.size(); i++)
+ {
+ cout << imageLine[i].first << ", " << imageLine[i].second <<endl;
+ }
+ }
+ */
+
+/*
+ for (int i = 0; i < mountLines.size(); i++)
+ {
+ mountLine = mountLines[i];
+ cout <<"printing image line "<<i+1<<endl;
+ for (int i = 0; i < mountLine.size(); i++)
+ {
+ cout << mountLine[i].first << ", " << mountLine[i].second <<endl;
+ }
+ }
+ */
+
+/*
+
+ for (int i = 0; i < slotsVect[0].imageLines.size(); i++)
+ {
+ cout<<"ismail"<<slotsVect[0].imageLines.size()<<endl;
+
+ //cout << slots[i].first << ", " << slots[i].second <<endl;
+
+ }
+
+
+ */
+
+delete parser;
+
+std::cout << "plan readed" << std::endl;
 }
 
 void ObservationPlan::waitMicroSec(long microsec) {
@@ -418,49 +458,119 @@ uint64_t ObservationPlan::GetTimeStamp() {
 	gettimeofday(&tv, NULL);
 	return tv.tv_sec * (uint64_t) 1000000 + tv.tv_usec;
 
-
-
 }
-vector<string> ObservationPlan::timeParser(string planTime)
-{
+vector<string> ObservationPlan::timeParser(string planTime) {
 	std::string s = planTime;
-		std::string milliSecond="0.";
-		std::string delimiter = "_";
-	    std::vector<string> all;
-		size_t pos = 0;
-		std::string token;
-		string dateAndTime = "";
-		while ((pos = s.find(delimiter)) != std::string::npos) {
-		    token = s.substr(0, pos);
-		  //  std::cout << token << std::endl;
-		    dateAndTime+=token;
-		    all.push_back(token);
-		    s.erase(0, pos + delimiter.length());
-		}
-		//std::cout << s << std::endl;
-	        milliSecond+=s;
-	        all.push_back(milliSecond);
-
-	        /*for (std::vector<string>::const_iterator i = all.begin(); i != all.end(); ++i)
-	            std::cout << *i << ' ';
-	        */
-	        return all;
+	std::string milliSecond = "";
+	std::string delimiter = "_";
+	std::vector<string> all;
+	size_t pos = 0;
+	std::string token;
+	string dateAndTime = "";
+	while ((pos = s.find(delimiter)) != std::string::npos) {
+		token = s.substr(0, pos);
+		//  std::cout << token << std::endl;
+		dateAndTime += token;
+		all.push_back(token);
+		s.erase(0, pos + delimiter.length());
+	}
+	//std::cout << s << std::endl;
+	milliSecond += s;
+	all.push_back(milliSecond);
+/*
+	for (std::vector<string>::const_iterator i = all.begin(); i != all.end(); ++i)
+	 std::cout << *i << ' ';
+*/
+	return all;
 
 }
 
-void ObservationPlan::parsedToDateTime(vector<string> parsedDateTime)
+void ObservationPlan::parsedToDateTime(vector<string> parsedDateTime) {
+	struct tm tm;
+	char buf[255];
+	string dateString = parsedDateTime[0] + "_" + parsedDateTime[1];
+	memset(&tm, 0, sizeof(struct tm));
+
+	strptime(dateString.c_str(), "%Y%m%d_%H%M%S", &tm);
+	strftime(buf, sizeof(buf), "%d %b %Y %H:%M:%S", &tm);
+	puts(buf);
+
+	//exit(EXIT_SUCCESS);
+
+}
+
+long long ObservationPlan::parsedToDateMilliSec(vector<string> parsedDateTime) {
+	/*  struct tm tm;
+	 char buf[255];
+	 string dateString = parsedDateTime[0]+"_"+ parsedDateTime[1];
+	 memset(&tm, 0, sizeof(struct tm));
+
+	 strptime(dateString.c_str(), "%Y%m%d_%H%M%S", &tm);
+	 strftime(buf, sizeof(buf), "%d %b %Y %H:%M:%S", &tm);
+	 puts(buf);
+
+
+	 //exit(EXIT_SUCCESS);
+	 *
+	 */
+	std::tm tm = { };
+	std::string vectorToString = parsedDateTime[0] + "_" + parsedDateTime[1]
+			+ "." + parsedDateTime[1];
+	//std::cout << "vector string is " << vectorToString << std::endl;
+	const char* snext = ::strptime(vectorToString.c_str(), "%Y%m%d_%H%M%S",
+			&tm);
+	auto time_point = std::chrono::system_clock::from_time_t(std::mktime(&tm));
+	long long duration_ms = time_point.time_since_epoch()
+			/ std::chrono::milliseconds(1) + std::atof(snext) * 1000.0f;
+	return duration_ms;
+
+}
+
+
+int ObservationPlan::nonparsedToDateMicroSec(string parsedDateTime)
 {
-	        struct tm tm;
-			char buf[255];
-            string dateString = parsedDateTime[0]+"_"+ parsedDateTime[1];
-			memset(&tm, 0, sizeof(struct tm));
+	//std::cout<<"input is " <<parsedDateTime<<std::endl;
 
-			strptime(dateString.c_str(), "%Y%m%d_%H%M%S", &tm);
-			strftime(buf, sizeof(buf), "%d %b %Y %H:%M:%S", &tm);
-			puts(buf);
+    if(parsedDateTime.size()>3)
+	return std::stoi(parsedDateTime.substr(3,3));
+
+    return 0;
+}
 
 
-			//exit(EXIT_SUCCESS);
 
+long long ObservationPlan::nonParsedToDateMilliSec(string parsedDateTime) {
+
+	std::tm tm = { };
+	const char* snext = ::strptime(parsedDateTime.c_str(), "%Y%m%d_%H%M%S",
+			&tm);
+	auto time_point = std::chrono::system_clock::from_time_t(std::mktime(&tm));
+	long long duration_ms = time_point.time_since_epoch()
+			/ std::chrono::milliseconds(1) + std::atof(snext) * 1000.0f;
+	return duration_ms;
+
+}
+
+long long ObservationPlan::return_current_time_and_date() {
+	/*
+	 std::tm tm = {};
+	 std::stringstream ss2("Jan 9 2014 12:35:34.23");
+	 ss2 >> std::get_time(&tm, "%b %d %Y %H:%M:%S");
+	 auto tp = std::chrono::system_clock::from_time_t(std::mktime(&tm));
+	 */
+
+	//std::cout << duration_ms << std::endl;
+	//std::cout <<"snext is "<< snext << std::endl;
+
+	auto now = std::chrono::system_clock::now();
+	auto duration = now.time_since_epoch();
+	auto millis = std::chrono::duration_cast < std::chrono::milliseconds> (duration).count();
+	std::cout << "now in millisec is  " << millis << std::endl;
+	return millis;
+	//std::cout <<"difference is   "<< duration_ms-millis<< std::endl;
+
+	//  std::stringstream ss;
+	// ss << std::put_time(std::localtime(&in_time_t), "%Y-%m-%d %X");
+	//return ss.str();
 
 }
